@@ -11,6 +11,7 @@ namespace Blazor
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+            builder.Services.AddScoped<AnnonceService>();
 
             var app = builder.Build();
 
