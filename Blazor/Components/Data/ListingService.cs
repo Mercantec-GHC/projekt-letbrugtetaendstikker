@@ -18,13 +18,16 @@ public class ListingService
         await conn.OpenAsync();
 
         using var cmd = new NpgsqlCommand(
-            "INSERT INTO Listings (Title, Description, Price, Image) VALUES (@t, @b, @p, @img)", conn);
+            "INSERT INTO Listings (Title, Description, Price, Image, OwnerID) VALUES (@t, @b, @p, @img, @ownerid)", conn);
         cmd.Parameters.AddWithValue("t", listing.Title);
         cmd.Parameters.AddWithValue("b", listing.Description ?? "");
         cmd.Parameters.AddWithValue("p", listing.Price);
         cmd.Parameters.AddWithValue("img", (object?)listing.Image ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("ownerid", (object?)listing.OwnerID ?? (object)DBNull.Value); //object? why?
         await cmd.ExecuteNonQueryAsync();
     }
+
+    
 
     public async Task<List<Listing>> GetAllListings()
     {
@@ -33,7 +36,10 @@ public class ListingService
         using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync();
 
-        using var cmd = new NpgsqlCommand("SELECT ListingID, Title, Description, Price, CreationTime, Image FROM Listings ORDER BY CreationTime DESC", conn);
+        using var cmd = new NpgsqlCommand(
+            "SELECT a.ListingID, a.Title, a.Description, a.Price, a.CreationTime, a.Image, a.OwnerID, b.Username " +
+            "FROM Listings a LEFT JOIN Users b ON a.OwnerID = b.UserID " +
+            "ORDER BY a.CreationTime DESC", conn);
         using var reader = await cmd.ExecuteReaderAsync();
 
         while (await reader.ReadAsync())
@@ -45,7 +51,9 @@ public class ListingService
                 Description = reader.GetString(2),
                 Price = reader.GetDecimal(3),
                 CreationTime = reader.GetDateTime(4),
-                Image = !reader.IsDBNull(5) ? (byte[])reader["Image"] : null
+                Image = !reader.IsDBNull(5) ? (byte[])reader["Image"] : null,
+                OwnerID = !reader.IsDBNull(6) ? reader.GetInt32(6) : (int?)null,
+                User = !reader.IsDBNull(7) ? new User {Username = reader.GetString(7)} : null
             });
         }
 
@@ -57,7 +65,10 @@ public class ListingService
         using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync();
 
-        using var cmd = new NpgsqlCommand("SELECT ListingID, Title, Description, Price, CreationTime, Image FROM Listings WHERE ListingID = @id", conn);
+        using var cmd = new NpgsqlCommand(
+            "SELECT a.ListingID, a.Title, a.Description, a.Price, a.CreationTime, a.Image, a.OwnerID, b.Username " + 
+            "FROM Listings a LEFT JOIN Users b ON a.OwnerID = b.UserID " +
+            "WHERE a.ListingID = @id ORDER BY a.CreationTime DESC", conn);
         cmd.Parameters.AddWithValue("id", ID);
         using var reader = await cmd.ExecuteReaderAsync();
 
@@ -70,11 +81,13 @@ public class ListingService
                 Description = reader.GetString(2),
                 Price = reader.GetDecimal(3),
                 CreationTime = reader.GetDateTime(4),
-                Image = !reader.IsDBNull(5) ? (byte[])reader["Image"] : null
+                Image = !reader.IsDBNull(5) ? (byte[])reader["Image"] : null,
+                OwnerID = !reader.IsDBNull(6) ? reader.GetInt32(6) : null,
+                User = !reader.IsDBNull(7) ? new User {Username = reader.GetString(7)} : null
             };
         }
-        return null;
-    }
+        else return null;
+        }
 
     // REDIGER
     public async Task EditListing(Listing listing)
@@ -102,6 +115,4 @@ public class ListingService
         cmd.Parameters.AddWithValue("id", id);
         await cmd.ExecuteNonQueryAsync();
     }
-
-
 }

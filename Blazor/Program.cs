@@ -12,6 +12,8 @@ namespace Blazor
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddScoped<ListingService>();
+            builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<AppState>();
 
             var app = builder.Build();
 

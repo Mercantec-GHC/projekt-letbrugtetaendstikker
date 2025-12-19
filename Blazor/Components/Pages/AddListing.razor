@@ -1,6 +1,7 @@
 ﻿@page "/create-listing"
 @inject ListingService listingService
 @rendermode InteractiveServer
+@inject AppState appState
 
 <h3>Create listing</h3>
 
@@ -45,10 +46,15 @@
 
     private async Task SaveListing()
     {
+        if (appState.CurrentUser == null)
+        {
+            message = "Log in to make a listing.";
+            return;
+        }
+        addListing.OwnerID = appState.CurrentUser.UserID;
         await listingService.AddListing(addListing);
         message = "Listing created.";
         addListing = new();
+        previewImageUrl = null;
     }
-
-    
 } 

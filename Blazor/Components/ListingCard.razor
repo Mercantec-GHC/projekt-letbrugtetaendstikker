@@ -25,6 +25,10 @@
             <span class="price">@Listing.Price.ToString("0.00", CultureInfo.InvariantCulture) $.</span>
             <span class="date">@Listing.CreationTime.ToString("dd-MM-yyyy HH:mm")</span>
         </div>
+        @if (Listing.User != null)
+        {
+            <div class="user">Oprettet af: @Listing.User.Username</div>
+        }
         @if (Listing.Image != null)
         {
             <img src="data:image/jpeg;base64,@Convert.ToBase64String(Listing.Image)" alt="Image" style="max-width:200px;max-height:200px;" />

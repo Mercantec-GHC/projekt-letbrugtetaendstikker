@@ -1,0 +1,28 @@
+@page "/create-account"
+@rendermode InteractiveServer
+@inject UserService userService
+
+<h3>Create account</h3>
+<EditForm Model="@newUser" OnValidSubmit="NewAccount" FormName="NewUserForm">
+    <InputText @bind-Value="newUser.Username" placeholder="Username" />
+    <br />
+    <InputText @bind-Value="newUser.Password" type="password" placeholder="Password" />
+    <br />
+    <button type="submit">Submit</button>
+</EditForm>
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private User newUser = new();
+    private string message;
+
+    private async Task NewAccount()
+    {
+        var success = await userService.NewAccount(newUser);
+        message = success ? "Success!" : "Error. Name already taken?";
+        newUser = new();
+    }
+} 

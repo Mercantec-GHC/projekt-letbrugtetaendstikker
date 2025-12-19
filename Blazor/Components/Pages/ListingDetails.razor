@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject ListingService listingService
 @inject NavigationManager NavigationManager
+@inject AppState appState
 
 <h3>Listing details</h3>
 @* pic?*@
@@ -16,13 +17,24 @@ else
             <h2>@listing.Title</h2>
             <p>@listing.Description</p>
             <p><strong>Price:</strong> @listing.Price.ToString("0.00") $.</p>
-            <p><strong>Oprettet:</strong> @listing.CreationTime.ToString("dd-MM-yyyy HH:mm")</p>
+            <p><strong>Created:</strong> @listing.CreationTime.ToString("dd-MM-yyyy HH:mm")</p>
+            @*<p><strong>Views: </strong>@listing.ListViews</p>*@
+            @if (listing.User != null)
+            {
+                <div class="user">Oprettet af: @listing.User.Username</div>
+            }
             @if (listing.Image != null)
             {
                 <img src="data:image/jpeg;base64,@Convert.ToBase64String(listing.Image)" alt="Image" style="max-width:200px;max-height:200px;" />
             }
-            <button @onclick="Edit">Edit</button>
-            <button @onclick="Delete" style="color:red;">Delete</button>
+            @if (appState.CurrentUser != null)
+            {
+                if (listing.OwnerID == appState.CurrentUser.UserID)
+                {
+                    < button @onclick = "Edit" > Edit </ button >
+                    <button @onclick="Delete" style="color:red;">Delete</button>
+                }
+            }
             @if (!string.IsNullOrEmpty(message))
             {
                 <p>@message</p>
