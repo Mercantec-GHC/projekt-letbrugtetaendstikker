@@ -1,0 +1,54 @@
+﻿@page "/create-listing"
+@inject ListingService listingService
+@rendermode InteractiveServer
+
+<h3>Create listing</h3>
+
+<EditForm Model="@addListing" OnValidSubmit="@SaveListing" FormName="CreateListingForm">
+    <InputText @bind-Value="addListing.Title" placeholder="Title" />
+    <br />
+    <InputTextArea @bind-Value="addListing.Description" placeholder="Description" />
+    <br />
+    <InputNumber @bind-Value="addListing.Price" placeholder="Price" />
+    <br />
+    <InputFile OnChange="@OnFileChange" />
+    <br />
+    <button type="submit">Submit</button>
+</EditForm>
+
+@if (previewImageUrl != null)
+{
+    <img src="@previewImageUrl" alt="Image-preview" style="max-width:200px;max-height:200px;" />
+}
+
+@if (message != null)
+{
+    <p>@message</p>
+}
+
+@code {
+    private Listing addListing = new();
+    private string message;
+    private string previewImageUrl;
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5).CopyToAsync(ms); // max 5MB
+            addListing.Image = ms.ToArray();
+            previewImageUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(addListing.Image)}";
+        }
+    }
+
+    private async Task SaveListing()
+    {
+        await listingService.AddListing(addListing);
+        message = "Listing created.";
+        addListing = new();
+    }
+
+    
+} 

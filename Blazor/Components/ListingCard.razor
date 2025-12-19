@@ -1,0 +1,66 @@
+﻿@using System.Globalization
+@inherits OwningComponentBase
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+
+
+@* Modtag en annonce som parameter *@
+@code {
+    [Parameter]
+    public Listing Listing { get; set; }
+
+    private void OpenListing()
+    {
+        NavigationManager.NavigateTo($"/listing/{Listing.ListingID}");
+    }
+
+}
+
+<div class="card" @onclick="OpenListing" style="cursor:pointer">
+    <div class="card-body">
+        <h4>@Listing.Title</h4>
+        <p>@Listing.Description</p>
+        <div class="card-footer">
+            <span class="price">@Listing.Price.ToString("0.00", CultureInfo.InvariantCulture) $.</span>
+            <span class="date">@Listing.CreationTime.ToString("dd-MM-yyyy HH:mm")</span>
+        </div>
+        @if (Listing.Image != null)
+        {
+            <img src="data:image/jpeg;base64,@Convert.ToBase64String(Listing.Image)" alt="Image" style="max-width:200px;max-height:200px;" />
+        }
+    </div>
+</div>
+
+<style>
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 12px 0;
+        box-shadow: 1px 2px 12px rgba(0,0,0,0.06);
+        max-width: 400px;
+        background: #fafafa;
+    }
+
+    .card-body {
+        padding: 0;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+        font-size: 0.95em;
+        color: #666;
+    }
+
+    .price {
+        font-weight: bold;
+        color: #2a934f;
+    }
+
+    .date {
+        font-style: italic;
+    }
+</style>

@@ -1,0 +1,58 @@
+﻿@page "/listing/{id:int}"
+@rendermode InteractiveServer
+@inject ListingService listingService
+@inject NavigationManager NavigationManager
+
+<h3>Listing details</h3>
+@* pic?*@
+@if (listing == null)
+{
+    <p>Reading...</p>
+}
+else
+{
+    <div class="card" style="max-width:500px;">
+        <div class="card-body">
+            <h2>@listing.Title</h2>
+            <p>@listing.Description</p>
+            <p><strong>Price:</strong> @listing.Price.ToString("0.00") $.</p>
+            <p><strong>Oprettet:</strong> @listing.CreationTime.ToString("dd-MM-yyyy HH:mm")</p>
+            @if (listing.Image != null)
+            {
+                <img src="data:image/jpeg;base64,@Convert.ToBase64String(listing.Image)" alt="Image" style="max-width:200px;max-height:200px;" />
+            }
+            <button @onclick="Edit">Edit</button>
+            <button @onclick="Delete" style="color:red;">Delete</button>
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <p>@message</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private Listing listing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listing = await listingService.GetListingByID(id);
+    }
+
+    private string message;
+
+    private void Edit()
+    {
+        NavigationManager.NavigateTo($"/edit-listing/{listing.ListingID}");
+    }
+
+    private async Task Delete()
+    {
+        await listingService.DeleteListing(listing.ListingID);
+        message = "Annonce slettet.";
+        await Task.Delay(1200);
+        NavigationManager.NavigateTo("/listings");
+    }
+}

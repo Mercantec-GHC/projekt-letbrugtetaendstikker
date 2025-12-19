@@ -1,0 +1,67 @@
+﻿@page "/edit-listing/{id:int}"
+@inject ListingService listingService
+@inject NavigationManager nav
+
+<h3>Edit listing</h3>
+
+@if (listing == null)
+{
+    <p>Reading...</p>
+}
+else
+{
+    <EditForm Model="@listing" OnValidSubmit="@SaveChanges">
+        <InputText @bind-Value="listing.Title" placeholder="Title" />
+        <br />
+        <InputTextArea @bind-Value="listing.Description" placeholder="Description" />
+        <br />
+        <InputNumber @bind-Value="listing.Price" placeholder="Price" />
+        <br />
+        <InputFile OnChange="@OnFileChange" />
+        <br />
+        @if (previewImageUrl != null)
+        {
+            <img src="@previewImageUrl" alt="Image-preview" style="max-width:200px;max-height:200px;" />
+        }
+        <br />
+        <button type="submit">Save Changes</button>
+    </EditForm>
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p>@message</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private Listing listing;
+    private string message;
+    private string previewImageUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listing = await listingService.GetListingByID(id);
+        if (listing?.Image != null)
+            previewImageUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(listing.Image)}";
+    }
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5).CopyToAsync(ms);
+            listing.Image = ms.ToArray();
+            previewImageUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(listing.Image)}";
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        await listingService.EditListing(listing);
+        message = "Changes saved!";
+        nav.NavigateTo($"/listing/{listing.ListingID}");
+    }
+}

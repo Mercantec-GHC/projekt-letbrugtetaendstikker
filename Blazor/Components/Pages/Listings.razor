@@ -1,0 +1,40 @@
+﻿@page "/listings"
+@inject ListingService listingService
+@using Blazor.Components
+
+<h3>All listings</h3>
+
+@if (listings == null)
+{
+    <p>Reading...</p>
+}
+else if (!listings.Any())
+{
+    <p>Be the first to make a listing.</p>
+}
+else
+{
+    <div class="cards-container">
+        @foreach (var listing in listings)
+        {
+            <ListingCard Listing="listing" />
+        }
+    </div>
+}
+
+@code {
+    private List<Listing> listings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listings = await listingService.GetAllListings();
+    }
+}
+
+<style>
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+</style>
