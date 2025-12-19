@@ -1,0 +1,54 @@
+﻿@page "/tilfoej-annonce"
+@inject AnnonceService annonceService
+@rendermode InteractiveServer
+@inject AppState appState
+
+<h3>Opret en annonce</h3>
+
+<EditForm Model="@nyAnnonce" OnValidSubmit="@GemAnnonce" FormName="OpretAnnonceForm">
+    <InputText @bind-Value="nyAnnonce.Titel" placeholder="Titel" />
+    <br />
+    <InputTextArea @bind-Value="nyAnnonce.Beskrivelse" placeholder="Beskrivelse" />
+    <br />
+    <InputNumber @bind-Value="nyAnnonce.Pris" placeholder="Pris" />
+    <br />
+    <InputFile OnChange="@OnFileChange" />
+    <br />
+    <button type="submit">Opret</button>
+</EditForm>
+
+@if (previewImageUrl != null)
+{
+    <img src="@previewImageUrl" alt="Billede-preview" style="max-width:200px;max-height:200px;" />
+}
+
+@if (besked != null)
+{
+    <p>@besked</p>
+}
+
+@code {
+    private Annonce nyAnnonce = new();
+    private string besked;
+    private string previewImageUrl;
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5).CopyToAsync(ms); // max 5MB
+            nyAnnonce.Image = ms.ToArray();
+            previewImageUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(nyAnnonce.Image)}";
+        }
+    }
+
+    private async Task GemAnnonce()
+    {
+        await annonceService.TilføjAnnonce(nyAnnonce);
+        besked = "Annonce oprettet!";
+        nyAnnonce = new();
+        previewImageUrl = null;
+    }
+}

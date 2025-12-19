@@ -1,0 +1,34 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@inject UserService userService
+@inject AppState appState
+
+<h3>Login</h3>
+<EditForm Model="@loginData" OnValidSubmit="LogIn" FormName="LoginForm">
+    <InputText @bind-Value="loginData.Username" placeholder="Username" />
+    <br />
+    <InputText @bind-Value="loginData.Password" type="password" placeholder="Password" />
+    <br />
+    <button type="submit">Log in</button>
+</EditForm>
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private User loginData = new();
+    private string message;
+
+    private async Task LogIn()
+    {
+        var user = await userService.LogIn(loginData.Username, loginData.Password);
+        if (user != null) {
+            appState.LogIn(user);
+            message = $"Velkommen, {user.Username}!";
+        }
+        else
+            message = "Forkert brugernavn eller adgangskode.";
+        loginData = new();
+    }
+}

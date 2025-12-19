@@ -1,0 +1,28 @@
+﻿@page "/create-user"
+@rendermode InteractiveServer
+@inject UserService userService
+
+<h3>Make Account</h3>
+<EditForm Model="@newUser" OnValidSubmit="Create" FormName="CreateUserForm">
+    <InputText @bind-Value="newUser.Username" placeholder="Username" />
+    <br />
+    <InputText @bind-Value="newUser.Password" type="password" placeholder="Password" />
+    <br />
+    <button type="submit">Create Account</button>
+</EditForm>
+@if (!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private User newUser = new();
+    private string message;
+
+    private async Task Create()
+    {
+        var success = await userService.CreateUser(newUser);
+        message = success ? "Bruger oprettet!" : "Kunne ikke oprette bruger (brugernavn i brug?)";
+        newUser = new();
+    }
+}

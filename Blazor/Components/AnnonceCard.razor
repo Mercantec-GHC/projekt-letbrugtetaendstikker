@@ -1,0 +1,75 @@
+﻿@using System.Globalization
+@inherits OwningComponentBase
+
+@* Modtag en annonce som parameter *@
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@if (Annonce.Image != null)
+{
+    <img src="data:image/jpeg;base64,@Convert.ToBase64String(Annonce.Image)" alt="Image" style="max-width:200px;max-height:200px;" />
+}
+@if (Annonce.User != null)
+{
+    <div class="user">Oprettet af: @Annonce.User.Username</div>
+}
+
+<div class="card" @onclick="ÅbenAnnonce" style="cursor:pointer">
+    <div class="card-body">
+        <h4>@Annonce.Titel</h4>
+        <p>@Annonce.Beskrivelse</p>
+        <div class="card-footer">
+            <span class="pris">@Annonce.Pris.ToString("0.00") kr.</span>
+            <span class="dato">@Annonce.Oprettet.ToString("dd-MM-yyyy HH:mm")</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Annonce Annonce { get; set; }
+
+    private void ÅbenAnnonce()
+    {
+        NavigationManager.NavigateTo($"/annonce/{Annonce.Id}");
+    }
+}
+@*
+<div class="card">
+    <div class="card-body">
+        <h4>@Annonce.Titel</h4>
+        <p>@Annonce.Beskrivelse</p>
+        <div class="card-footer">
+            <span class="pris">@Annonce.Pris.ToString("0.00", CultureInfo.InvariantCulture) kr.</span>
+            <span class="dato">@Annonce.Oprettet.ToString("dd-MM-yyyy HH:mm")</span>
+        </div>
+    </div>
+</div>
+*@
+<style>
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 12px 0;
+    box-shadow: 1px 2px 12px rgba(0,0,0,0.06);
+    max-width: 400px;
+    background: #fafafa;
+}
+.card-body {
+    padding: 0;
+}
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    font-size: 0.95em;
+    color: #666;
+}
+.pris {
+    font-weight: bold;
+    color: #2a934f;
+}
+.dato {
+    font-style: italic;
+}
+</style>
