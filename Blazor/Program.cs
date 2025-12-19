@@ -17,6 +17,9 @@ namespace Blazor
            builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<AppState>();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
